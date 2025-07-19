@@ -1,0 +1,387 @@
+import { Colors } from "@/constants/Colors";
+import { StyleSheet } from "react-native";
+
+export const mealPlanDetailScreenStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 32,
+  },
+  
+  // Header styles
+  headerContainer: {
+    padding: 20,
+    paddingBottom: 16,
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+    marginBottom: 8,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.primary,
+    marginBottom: 8,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 4,
+  },
+  headerNotes: {
+    fontSize: 14,
+    color: '#64748b',
+    fontStyle: 'italic',
+    marginTop: 6,
+  },
+  
+  // Calendar styles
+  calendarContainer: {
+    backgroundColor: 'white',
+    margin: 16,
+    borderRadius: 16,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+  },
+  todayButton: {
+    alignSelf: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#e0f2fe',
+    borderRadius: 20,
+    marginTop: 14,
+    marginBottom: 4,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  todayButtonText: {
+    color: Colors.primary,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  selectedDateContainer: {
+    marginHorizontal: 16,
+    marginVertical: 12,
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 30,
+    alignSelf: 'center',
+  },
+  selectedDateText: {
+    fontSize: 16,
+    color: '#334155',
+    fontWeight: '600',
+  },
+  
+  // Meals section styles
+  mealsContainer: {
+    paddingHorizontal: 16,
+    marginTop: 8,
+  },
+  mealCard: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 18,
+    marginVertical: 10,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 0.2,
+    borderColor: '#f1f5f9',
+  },
+  mealTypeTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: 14,
+  },
+  mealContent: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    padding: 14,
+  },
+  mealInfo: {
+    paddingBottom: 12,
+  },
+  mealInfoTappable: {
+    borderTopLeftRadius: 4,
+    borderBottomLeftRadius: 4,
+  },
+  mealName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#334155',
+    marginBottom: 8,
+    lineHeight: 22,
+  },
+  mealDetails: {
+    gap: 6,
+  },
+  mealDetailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  mealDetailText: {
+    fontSize: 13,
+    color: '#64748b',
+    flex: 1,
+  },
+  mealActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+  },
+  statusButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+  },
+  completedButton: {
+    backgroundColor: '#dcfce7',
+    borderWidth: 1,
+    borderColor: '#86efac',
+  },
+  incompletedButton: {
+    backgroundColor: '#f1f5f9',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  completedText: {
+    color: '#166534',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  incompletedText: {
+    color: '#64748b',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  deleteButton: {
+    padding: 6,
+  },
+  emptyMealContent: {
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderStyle: 'dashed',
+  },
+  emptyMealText: {
+    color: '#94a3b8',
+    marginBottom: 12,
+    fontSize: 14,
+  },
+  addMealButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e0f2fe',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 24,
+    gap: 6,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  addMealButtonText: {
+    color: Colors.primary,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  
+  // Summary section styles
+  summaryContainer: {
+    margin: 16,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 16,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+  },
+  summaryTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: 18,
+  },
+  progressContainer: {
+    marginBottom: 8,
+  },
+  progressBar: {
+    height: 10,
+    borderRadius: 5,
+  },
+  progressDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  progressText: {
+    fontSize: 15,
+    color: '#64748b',
+  },
+  progressPercentage: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#22c55e',
+  },
+  
+  // Skeleton styles
+  skeletonContainer: {
+    padding: 12,
+  },
+  calendarSkeleton: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 20,
+  },
+  calendarHeaderSkeleton: {
+    height: 24,
+    width: '50%',
+    backgroundColor: '#e2e8f0',
+    marginBottom: 16,
+    borderRadius: 4,
+  },
+  calendarDaysSkeleton: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 10,
+  },
+  calendarDaySkeleton: {
+    height: 16,
+    width: 16,
+    borderRadius: 8,
+    backgroundColor: '#e2e8f0',
+  },
+  calendarWeekSkeleton: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 10,
+  },
+  calendarDayItemSkeleton: {
+    height: 36,
+    width: 36,
+    borderRadius: 18,
+    backgroundColor: '#e2e8f0',
+  },
+  mealCardSkeleton: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 8,
+  },
+  mealTypeSkeleton: {
+    height: 20,
+    width: '40%',
+    backgroundColor: '#e2e8f0',
+    marginBottom: 12,
+    borderRadius: 4,
+  },
+  mealContentSkeleton: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    padding: 12,
+    gap: 12,
+  },
+  mealNameSkeleton: {
+    height: 18,
+    width: '70%',
+    backgroundColor: '#e2e8f0',
+    borderRadius: 4,
+  },
+  mealDetailsSkeleton: {
+    height: 14,
+    width: '90%',
+    backgroundColor: '#e2e8f0',
+    borderRadius: 4,
+    marginTop: 6,
+  },
+  mealActionsSkeleton: {
+    height: 28,
+    width: '50%',
+    backgroundColor: '#e2e8f0',
+    borderRadius: 14,
+    marginTop: 8,
+    alignSelf: 'flex-start',
+  },
+  summarySkeleton: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 8,
+  },
+  summaryTextSkeleton: {
+    height: 20,
+    width: '60%',
+    backgroundColor: '#e2e8f0',
+    marginBottom: 16,
+    borderRadius: 4,
+  },
+  progressSkeleton: {
+    height: 8,
+    width: '100%',
+    backgroundColor: '#e2e8f0',
+    borderRadius: 4,
+  },
+  
+  // Error styles
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#64748b',
+    textAlign: 'center',
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  retryButton: {
+    backgroundColor: Colors.primary,
+    paddingVertical: 14,
+    paddingHorizontal: 28,
+    borderRadius: 30,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  retryButtonText: {
+    color: 'white',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+});
