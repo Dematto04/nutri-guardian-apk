@@ -3,14 +3,14 @@ import { Ionicons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { ThemedButton } from './ThemedButton';
 import { ThemedText } from './ThemedText';
@@ -74,6 +74,10 @@ export function SmartMealPlanGenerator({ onGenerated, onCancel }: SmartMealPlanG
     try {
       setOptionsLoading(true);
       const response = await MealPlanService.getSmartGenerationOptions();
+      console.log({
+        response
+      });
+      
       
       if (response.data?.isSucceeded) {
         setOptions(response.data.data);
@@ -205,7 +209,7 @@ export function SmartMealPlanGenerator({ onGenerated, onCancel }: SmartMealPlanG
           </ThemedText>
         </View>
 
-        {/* Quick Actions */}
+        {/* Quick Actions
         <View style={styles.quickActions}>
           <ThemedButton
             title="🚀 Tạo Tuần Nhanh"
@@ -213,7 +217,7 @@ export function SmartMealPlanGenerator({ onGenerated, onCancel }: SmartMealPlanG
             style={styles.quickButton}
             disabled={loading}
           />
-        </View>
+        </View> */}
 
         {/* Basic Info */}
         <View style={styles.section}>
@@ -281,7 +285,6 @@ export function SmartMealPlanGenerator({ onGenerated, onCancel }: SmartMealPlanG
               onValueChange={(value) => setPreferences(prev => ({ ...prev, maxCookingTime: Math.round(value) }))}
               minimumTrackTintColor="#007AFF"
               maximumTrackTintColor="#E0E0E0"
-              thumbStyle={styles.sliderThumb}
             />
             <View style={styles.timeRangeLabels}>
               <Text style={styles.timeLabel}>5 phút</Text>
@@ -336,9 +339,9 @@ export function SmartMealPlanGenerator({ onGenerated, onCancel }: SmartMealPlanG
                   styles.mealTypeChipText,
                   preferences.preferredMealTypes.includes(mealType) && styles.mealTypeChipTextSelected
                 ]}>
-                  {mealType === 'breakfast' ? '🌅 Sáng' :
-                   mealType === 'lunch' ? '☀️ Trưa' :
-                   mealType === 'dinner' ? '🌙 Tối' : '🍿 Snack'}
+                  {mealType === 'Bữa sáng' ? '🌅 Sáng' :
+                   mealType === 'Bữa trưa' ? '☀️ Trưa' :
+                   mealType === 'Bữa tối' ? '🌙 Tối' : '🍿 Snack'}
                 </Text>
               </TouchableOpacity>
             ))}

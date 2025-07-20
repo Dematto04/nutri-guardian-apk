@@ -113,7 +113,7 @@ function EducationScreen() {
       <View className="flex-row relative items-center justify-center mb-4">
         <TextInput
           className="flex-1 bg-[#F2F3F2] pl-12 h-14 rounded-xl"
-          placeholder="Tìm kiếm allergen..."
+          placeholder="Tìm kiếm dị ứng..."
           value={searchQuery}
           onChangeText={setSearchQuery}
         />

@@ -3,14 +3,14 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 interface Allergen {
@@ -59,6 +59,9 @@ export default function AllergenProfileScreen() {
     try {
       setLoading(true);
       const response = await UserAllergyService.getUserAllergyProfile();
+      console.log({
+        profile: response
+      });
       
       if (response.data?.isSucceeded) {
         setProfileData(response.data.data);
@@ -96,6 +99,9 @@ export default function AllergenProfileScreen() {
       case 'severe':
       case 'nặng':
         return '#F44336';
+      case 'critical':
+      case 'rất nặng':
+        return '#D32F2F';
       default:
         return '#757575';
     }
@@ -109,6 +115,8 @@ export default function AllergenProfileScreen() {
         return 'Trung bình';
       case 'severe':
         return 'Nặng';
+      case 'critical':
+        return 'Rất nặng';
       default:
         return severity || 'Chưa xác định';
     }

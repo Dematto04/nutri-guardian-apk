@@ -89,10 +89,7 @@ export function PayOSWebView({
       } catch (error) {
         console.error('Error checking payment status on success URL:', error);
       }
-    } else if (url.includes('cancel') || url.includes('fail') || url.includes('error')) {
-      console.log('Detected potential payment failure in URL');
-      onPaymentCancel();
-    }
+    } 
   };
 
   const handleError = () => {
@@ -158,12 +155,12 @@ export function PayOSWebView({
         </View>
       )}
 
-      {/* Polling indicator */}
+      {/* Polling indicator
       {polling && (
         <View style={styles.pollingContainer}>
           <ThemedText style={styles.pollingText}>Đang kiểm tra trạng thái thanh toán...</ThemedText>
         </View>
-      )}
+      )} */}
 
       {/* WebView */}
       <WebView
