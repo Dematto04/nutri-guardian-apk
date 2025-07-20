@@ -1,5 +1,6 @@
 import { ThemedView } from "@/components/ThemedView";
 import ExploreSkeleton from "@/components/explore/ExploreSkeleton";
+import { Colors } from "@/constants/Colors";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { MealPlanService } from "@/service/mealPlan.service";
 import { RecipeService } from "@/service/recipe.service";
@@ -164,6 +165,10 @@ function ExploreScreen() {
             }
           })
         );
+        console.log({
+          recipe: recipeDetails.filter(recipe => recipe !== null)
+        });
+        
         
         setRecommendedRecipes(recipeDetails.filter(recipe => recipe !== null));
       }
@@ -259,9 +264,9 @@ function ExploreScreen() {
       onPress={() => router.push(`/(tabs)/explore/recipe-detail/${item.id}`)}
     >
       <Image
-        source={{ uri: item.imageUrl || 'https://via.placeholder.com/150' }}
+        source={item.imageUrl ? { uri: item.imageUrl} : require("@/assets/images/ai_re.png")}
         style={styles.recommendationImage}
-        resizeMode="cover"
+        resizeMode="contain"
       />
       <View style={styles.recommendationOverlay}>
         <Text style={styles.recommendationTitle} numberOfLines={2}>
@@ -270,7 +275,7 @@ function ExploreScreen() {
         <View style={styles.recommendationMeta}>
           <View style={styles.metaItem}>
             <Ionicons name="time-outline" size={12} color="white" />
-            <Text style={styles.metaText}>{item.prepTime + item.cookTime}min</Text>
+            <Text style={styles.metaText}>{item.prepTimeMinutes + item.cookTimeMinutes} phút</Text>
           </View>
           {item.difficulty && (
             <View style={styles.metaItem}>
@@ -286,7 +291,7 @@ function ExploreScreen() {
   const renderRecommendationsSection = () => (
     <View style={styles.recommendationsSection}>
       <View style={styles.sectionHeader}>
-        <Ionicons name="sparkles" size={20} color="#007AFF" />
+        <Ionicons name="sparkles" size={20} color={Colors.primary} />
         <Text style={styles.sectionTitle}>
           {selectedMealType === 'all' ? 'Gợi ý cho bạn' : `Gợi ý ${mealTypeFilters.find(f => f.key === selectedMealType)?.label}`}
         </Text>
@@ -294,7 +299,7 @@ function ExploreScreen() {
 
       {recommendationsLoading ? (
         <View style={styles.recommendationsLoading}>
-          <ActivityIndicator size="small" color="#007AFF" />
+          <ActivityIndicator size="small" color="" />
           <Text style={styles.loadingText}>Đang tìm món ngon cho bạn...</Text>
         </View>
       ) : recommendedRecipes.length > 0 ? (
@@ -414,12 +419,12 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e2e8f0',
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold' as const,
+    fontSize: 18,
+    fontWeight: '500' as const,
     color: '#1e293b',
   },
   smartButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '',
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -444,8 +449,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   filterChipSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   filterChipText: {
     fontSize: 14,
@@ -503,7 +508,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.4)',
     padding: 12,
   },
   recommendationTitle: {
@@ -543,10 +548,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row' as const,
     flexWrap: 'wrap' as const,
     justifyContent: 'space-between' as const,
-    gap: 16,
+    gap: 0,
   },
   categoryCard: {
     width: '48%',
+    marginTop: 12,
     borderRadius: 12,
     borderWidth: 1,
     padding: 16,

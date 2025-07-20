@@ -3,8 +3,9 @@ import { MealPlanService } from "@/service/mealPlan.service";
 import { mealPlanDetailScreenStyles as styles } from "@/styles/tracking/detail-meal-plan.style";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { Progress } from "@gluestack-ui/themed";
+import { useIsFocused } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   RefreshControl,
@@ -108,14 +109,16 @@ export default function MealPlanDetail() {
   const [isError, setIsError] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  
+  const isFocused = useIsFocused()
   // Helper function to normalize meal types
   const normalizeMealType = (mealType: string): NormalizedMealType => {
-    if (mealType === "Bữa sáng" || mealType === "Breakfast" || mealType === "1") {
+    const lowerMealType = mealType.toLowerCase();
+    
+    if (lowerMealType === "bữa sáng" || lowerMealType === "breakfast" || mealType === "1") {
       return NormalizedMealType.BREAKFAST;
-    } else if (mealType === "Bữa trưa" || mealType === "Lunch" || mealType === "2") {
+    } else if (lowerMealType === "bữa trưa" || lowerMealType === "lunch" || mealType === "2") {
       return NormalizedMealType.LUNCH;
-    } else if (mealType === "Bữa tối" || mealType === "Dinner" || mealType === "3") {
+    } else if (lowerMealType === "bữa tối" || lowerMealType === "dinner" || mealType === "3") {
       return NormalizedMealType.DINNER;
     } else {
       // Default to breakfast if unspecified
@@ -149,7 +152,7 @@ export default function MealPlanDetail() {
   };
 
   // Fetch meal plan data
-  const fetchMealPlanDetail = useCallback(async (showLoader = true) => {
+  const fetchMealPlanDetail = async (showLoader = true) => {
     if (showLoader) setIsLoading(true);
     setIsError(false);
     
@@ -160,6 +163,7 @@ export default function MealPlanDetail() {
       
       const res = await MealPlanService.getMealPlanDetail(id as string);
       const responseData = res.data as MealPlanDetailResponse;
+      console.log({planMealDetail: responseData});
       
       if (responseData.isSucceeded && responseData.data) {
         setMealPlanDetail(responseData.data);
@@ -182,7 +186,7 @@ export default function MealPlanDetail() {
       setIsLoading(false);
       setRefreshing(false);
     }
-  }, [id]);
+  }
   
   // Handle refresh
   const handleRefresh = () => {
@@ -193,7 +197,7 @@ export default function MealPlanDetail() {
   // Effect to fetch data on mount
   useEffect(() => {
     fetchMealPlanDetail();
-  }, [fetchMealPlanDetail]);
+  }, [isFocused]);
   
   // Prepare marked dates for calendar
   const markedDates = useMemo(() => {
@@ -373,27 +377,6 @@ export default function MealPlanDetail() {
                 )}
               </View>
             </TouchableOpacity>
-            
-            <View style={styles.mealActions}>
-              <TouchableOpacity 
-                style={[
-                  styles.statusButton,
-                  meal.isCompleted ? styles.completedButton : styles.incompletedButton
-                ]}
-                onPress={() => handleToggleMealCompletion(meal)}
-              >
-                <Text style={meal.isCompleted ? styles.completedText : styles.incompletedText}>
-                  {meal.isCompleted ? '✅ Hoàn thành' : '⬜ Chưa ăn'}
-                </Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={styles.deleteButton}
-                onPress={() => handleDeleteMeal(meal)}
-              >
-                <Ionicons name="trash-outline" size={20} color="#ef4444" />
-              </TouchableOpacity>
-            </View>
           </View>
         ) : (
           <View style={styles.emptyMealContent}>

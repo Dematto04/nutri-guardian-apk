@@ -1,20 +1,18 @@
 import { Colors } from "@/constants/Colors";
 import { MealPlanService } from "@/service/mealPlan.service";
 import { Ionicons } from "@expo/vector-icons";
-import {
-    ScrollView
-} from "@gluestack-ui/themed";
+import { Image, ScrollView } from "@gluestack-ui/themed";
 import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    RefreshControl,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
@@ -31,8 +29,8 @@ interface MealEntry {
   recipe?: {
     id: number;
     name: string;
-    prepTime: number;
-    cookTime: number;
+    prepTimeMinutes: number;
+    cookTimeMinutes: number;
   };
   isCompleted: boolean;
 }
@@ -101,23 +99,23 @@ function TrackingScreen() {
   };
 
   const extractTodaysMeals = (plans: MealPlan[]) => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     const todayMeals: MealEntry[] = [];
-    
-    plans.forEach(plan => {
-      const todayEntries = plan.mealEntries?.filter(entry => 
-        entry.mealDate === today
-      ) || [];
+
+    plans.forEach((plan) => {
+      const todayEntries =
+        plan.mealEntries?.filter((entry) => entry.mealDate === today) || [];
       todayMeals.push(...todayEntries);
     });
-    
+
     // Sort by meal type order
-    const mealOrder = { 'breakfast': 1, 'lunch': 2, 'dinner': 3, 'snack': 4 };
-    todayMeals.sort((a, b) => 
-      (mealOrder[a.mealType as keyof typeof mealOrder] || 99) - 
-      (mealOrder[b.mealType as keyof typeof mealOrder] || 99)
+    const mealOrder = { breakfast: 1, lunch: 2, dinner: 3, snack: 4 };
+    todayMeals.sort(
+      (a, b) =>
+        (mealOrder[a.mealType as keyof typeof mealOrder] || 99) -
+        (mealOrder[b.mealType as keyof typeof mealOrder] || 99)
     );
-    
+
     setTodaysMeals(todayMeals);
   };
 
@@ -126,39 +124,53 @@ function TrackingScreen() {
     getMealPlan(false);
   };
 
-  const handleMealCompletion = async (planId: number, entryId: number, isCompleted: boolean) => {
+  const handleMealCompletion = async (
+    planId: number,
+    entryId: number,
+    isCompleted: boolean
+  ) => {
     try {
       await MealPlanService.toggleMealCompletion(planId, entryId, !isCompleted);
-      
+
       // Update local state
-      setMealPlans(prev => prev.map(plan => {
-        if (plan.id === planId) {
-          const updatedEntries = plan.mealEntries.map(entry => 
-            entry.id === entryId ? { ...entry, isCompleted: !isCompleted } : entry
-          );
-          const completedCount = updatedEntries.filter(e => e.isCompleted).length;
-          
-          return {
-            ...plan,
-            mealEntries: updatedEntries,
-            completedMeals: completedCount
-          };
-        }
-        return plan;
-      }));
-      
+      setMealPlans((prev) =>
+        prev.map((plan) => {
+          if (plan.id === planId) {
+            const updatedEntries = plan.mealEntries.map((entry) =>
+              entry.id === entryId
+                ? { ...entry, isCompleted: !isCompleted }
+                : entry
+            );
+            const completedCount = updatedEntries.filter(
+              (e) => e.isCompleted
+            ).length;
+
+            return {
+              ...plan,
+              mealEntries: updatedEntries,
+              completedMeals: completedCount,
+            };
+          }
+          return plan;
+        })
+      );
+
       // Update today's meals
-      setTodaysMeals(prev => prev.map(entry => 
-        entry.id === entryId ? { ...entry, isCompleted: !isCompleted } : entry
-      ));
-      
+      setTodaysMeals((prev) =>
+        prev.map((entry) =>
+          entry.id === entryId ? { ...entry, isCompleted: !isCompleted } : entry
+        )
+      );
+
       Toast.show({
         type: "success",
         text1: !isCompleted ? "Bữa ăn đã hoàn thành! 🎉" : "Đã hủy hoàn thành",
-        text2: !isCompleted ? "Tuyệt vời! Bạn đang tiến bộ rất tốt" : "Bữa ăn được đánh dấu chưa hoàn thành",
+        text2: !isCompleted
+          ? "Tuyệt vời! Bạn đang tiến bộ rất tốt"
+          : "Bữa ăn được đánh dấu chưa hoàn thành",
       });
     } catch (error) {
-      console.error('Error toggling meal completion:', error);
+      console.error("Error toggling meal completion:", error);
       Toast.show({
         type: "error",
         text1: "Lỗi",
@@ -170,29 +182,37 @@ function TrackingScreen() {
   const getRecommendations = async (mealType: string) => {
     try {
       const preferences = {
-        cuisineTypes: ['Italian', 'Asian'], // Could be saved in user preferences
+        cuisineTypes: ["Italian", "Asian"], // Could be saved in user preferences
         maxCookingTime: 45,
-        budgetRange: 'medium' as const,
+        budgetRange: "medium" as const,
         preferredMealTypes: [mealType],
         includeLeftovers: true,
         varietyMode: true,
       };
-      
-      const response = await MealPlanService.getRecipeRecommendations(mealType, preferences);
-      
+
+      const response = await MealPlanService.getRecipeRecommendations(
+        mealType,
+        preferences
+      );
+
       if (response.data?.isSucceeded) {
         const recipeIds = response.data.data;
         Alert.alert(
           "Gợi ý món ăn",
           `Tìm thấy ${recipeIds.length} món ${mealType} phù hợp với bạn!`,
           [
-            { text: "Xem chi tiết", onPress: () => {/* Navigate to recommendations */} },
-            { text: "Đóng", style: "cancel" }
+            {
+              text: "Xem chi tiết",
+              onPress: () => {
+                /* Navigate to recommendations */
+              },
+            },
+            { text: "Đóng", style: "cancel" },
           ]
         );
       }
     } catch (error) {
-      console.error('Error getting recommendations:', error);
+      console.error("Error getting recommendations:", error);
       Toast.show({
         type: "error",
         text1: "Lỗi",
@@ -209,9 +229,9 @@ function TrackingScreen() {
 
   const formatDisplayDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
+    return date.toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
     });
   };
 
@@ -220,22 +240,40 @@ function TrackingScreen() {
   };
 
   const getMealTypeIcon = (mealType: string) => {
-    switch (mealType) {
-      case 'breakfast': return '🌅';
-      case 'lunch': return '☀️';
-      case 'dinner': return '🌙';
-      case 'snack': return '🍿';
-      default: return '🍽️';
+    const normalizedType = mealType.toLowerCase();
+
+    if (normalizedType.includes("sáng") || normalizedType === "breakfast") {
+      return "🥐"; // Bánh mì croissant cho bữa sáng
+    } else if (normalizedType.includes("trưa") || normalizedType === "lunch") {
+      return "🍱"; // Hộp cơm cho bữa trưa
+    } else if (normalizedType.includes("tối") || normalizedType === "dinner") {
+      return "🌙"; // Bát phở cho bữa tối
+    } else if (
+      normalizedType.includes("snack") ||
+      normalizedType.includes("phụ")
+    ) {
+      return "🍿"; // Snack
+    } else {
+      return "🍽️"; // Default
     }
   };
 
   const getMealTypeName = (mealType: string) => {
-    switch (mealType) {
-      case 'breakfast': return 'Sáng';
-      case 'lunch': return 'Trưa';
-      case 'dinner': return 'Tối';
-      case 'snack': return 'Snack';
-      default: return mealType;
+    const normalizedType = mealType.toLowerCase();
+
+    if (normalizedType.includes("sáng") || normalizedType === "breakfast") {
+      return "Bữa sáng";
+    } else if (normalizedType.includes("trưa") || normalizedType === "lunch") {
+      return "Bữa trưa";
+    } else if (normalizedType.includes("tối") || normalizedType === "dinner") {
+      return "Bữa tối";
+    } else if (
+      normalizedType.includes("snack") ||
+      normalizedType.includes("phụ")
+    ) {
+      return "Snack";
+    } else {
+      return mealType;
     }
   };
 
@@ -247,7 +285,7 @@ function TrackingScreen() {
           <Text style={styles.emptyTodayText}>Chưa có bữa ăn nào hôm nay</Text>
           <TouchableOpacity
             style={styles.addMealButton}
-            onPress={() => router.push('/(tabs)/tracking/create-meal-plan')}
+            onPress={() => router.push("/(tabs)/tracking/create-meal-plan")}
           >
             <Text style={styles.addMealButtonText}>+ Thêm kế hoạch</Text>
           </TouchableOpacity>
@@ -259,60 +297,81 @@ function TrackingScreen() {
       <View style={styles.todaySection}>
         <View style={styles.todaySectionHeader}>
           <Text style={styles.todaySectionTitle}>🍽️ Bữa ăn hôm nay</Text>
-          <TouchableOpacity onPress={() => getRecommendations('dinner')}>
-            <Ionicons name="sparkles" size={20} color="#007AFF" />
+          <TouchableOpacity onPress={() => getRecommendations("dinner")}>
+            <Ionicons name="sparkles" size={20} color={Colors.primary} />
           </TouchableOpacity>
         </View>
-        
+
         {todaysMeals.map((meal) => (
           <TouchableOpacity
             key={meal.id}
             style={[
               styles.todayMealCard,
-              meal.isCompleted && styles.todayMealCardCompleted
+              meal.isCompleted && styles.todayMealCardCompleted,
             ]}
-            onPress={() => handleMealCompletion(
-              // Find the plan ID for this meal
-              mealPlans.find(plan => plan.mealEntries.some(e => e.id === meal.id))?.id || 0,
-              meal.id,
-              meal.isCompleted
-            )}
+            onPress={() => {
+              // Navigate to recipe detail if recipeId exists
+              if (meal.recipeId) {
+                router.push(`/(tabs)/explore/recipe-detail/${meal.recipeId}`);
+              } else {
+                Alert.alert(
+                  "Thông báo",
+                  "Món ăn này không có công thức chi tiết"
+                );
+              }
+            }}
           >
             <View style={styles.todayMealLeft}>
-              <View style={styles.mealCheckbox}>
-                <Ionicons
-                  name={meal.isCompleted ? "checkmark-circle" : "ellipse-outline"}
-                  size={24}
-                  color={meal.isCompleted ? "#4CAF50" : "#94a3b8"}
-                />
-              </View>
-              <View style={styles.todayMealContent}>
+              <View style={[styles.todayMealContent]}>
                 <Text style={styles.todayMealType}>
-                  {getMealTypeIcon(meal.mealType)} {getMealTypeName(meal.mealType)}
+                  {getMealTypeIcon(meal.mealType)}{" "}
+                  {getMealTypeName(meal.mealType)}
                 </Text>
-                <Text style={[
-                  styles.todayMealName,
-                  meal.isCompleted && styles.todayMealNameCompleted
-                ]}>
+                <Text
+                  style={[
+                    styles.todayMealName,
+                    meal.isCompleted && styles.todayMealNameCompleted,
+                  ]}
+                >
                   {meal.mealName}
                 </Text>
                 {meal.recipe && (
                   <Text style={styles.todayMealTime}>
-                    ⏱️ {meal.recipe.prepTime + meal.recipe.cookTime} phút
+                    ⏱️{" "}
+                    {meal.recipe.prepTimeMinutes + meal.recipe.cookTimeMinutes}{" "}
+                    phút
                   </Text>
                 )}
               </View>
             </View>
-            
-            <TouchableOpacity
-              style={styles.recommendButton}
-              onPress={(e) => {
-                e.stopPropagation();
-                getRecommendations(meal.mealType);
-              }}
-            >
-              <Ionicons name="bulb-outline" size={16} color="#007AFF" />
-            </TouchableOpacity>
+
+            <View style={styles.mealActionButtons}>
+              {/* Completion Status Button
+              <TouchableOpacity
+                style={styles.completionButton}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleMealCompletion(
+                    mealPlans.find(plan => plan.mealEntries.some(entry => entry.id === meal.id))?.id || 0,
+                    meal.id,
+                    meal.isCompleted
+                  );
+                }}
+              >
+                <Ionicons
+                  name={meal.isCompleted ? "checkmark-circle" : "ellipse-outline"}
+                  size={20}
+                  color={meal.isCompleted ? "#4CAF50" : "#94a3b8"}
+                />
+              </TouchableOpacity> */}
+
+              {/* Recipe Detail Arrow */}
+              {meal.recipeId && (
+                <TouchableOpacity style={styles.detailButton}>
+                  <Ionicons name="chevron-forward" size={16} color="#64748b" />
+                </TouchableOpacity>
+              )}
+            </View>
           </TouchableOpacity>
         ))}
       </View>
@@ -320,14 +379,21 @@ function TrackingScreen() {
   };
 
   const renderMealPlanCard = (mealPlan: MealPlan) => {
-    const completionPercentage = calculateCompletion(mealPlan.completedMeals, mealPlan.totalMeals);
-    const isActive = new Date(mealPlan.startDate) <= new Date() && new Date() <= new Date(mealPlan.endDate);
-    
+    const completionPercentage = calculateCompletion(
+      mealPlan.completedMeals,
+      mealPlan.totalMeals
+    );
+    const isActive =
+      new Date(mealPlan.startDate) <= new Date() &&
+      new Date() <= new Date(mealPlan.endDate);
+
     return (
       <TouchableOpacity
         key={mealPlan.id}
         style={[styles.mealPlanCard, isActive && styles.activeMealPlanCard]}
-        onPress={() => router.push(`/(tabs)/tracking/meal-plan-detail?id=${mealPlan.id}`)}
+        onPress={() =>
+          router.push(`/(tabs)/tracking/meal-plan-detail?id=${mealPlan.id}`)
+        }
         activeOpacity={0.7}
       >
         <View style={styles.mealPlanHeader}>
@@ -339,11 +405,12 @@ function TrackingScreen() {
               </View>
             )}
           </View>
-          
+
           <Text style={styles.mealPlanDate}>
-            {formatDisplayDate(mealPlan.startDate)} - {formatDisplayDate(mealPlan.endDate)}
+            {formatDisplayDate(mealPlan.startDate)} -{" "}
+            {formatDisplayDate(mealPlan.endDate)}
           </Text>
-          
+
           <View style={styles.mealPlanStats}>
             <View style={styles.statItem}>
               <Ionicons name="restaurant" size={16} color="#64748b" />
@@ -351,7 +418,9 @@ function TrackingScreen() {
             </View>
             <View style={styles.statItem}>
               <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
-              <Text style={styles.statText}>{mealPlan.completedMeals} hoàn thành</Text>
+              <Text style={styles.statText}>
+                {mealPlan.completedMeals} hoàn thành
+              </Text>
             </View>
             <View style={styles.statItem}>
               <Ionicons name="time" size={16} color="#64748b" />
@@ -363,15 +432,17 @@ function TrackingScreen() {
         <View style={styles.progressSection}>
           <View style={styles.progressHeader}>
             <Text style={styles.progressLabel}>Tiến độ</Text>
-            <Text style={styles.progressPercentage}>{completionPercentage}%</Text>
+            <Text style={styles.progressPercentage}>
+              {completionPercentage}%
+            </Text>
           </View>
-          
+
           <View style={styles.progressBarContainer}>
             <View style={styles.progressBarBackground}>
-              <View 
+              <View
                 style={[
                   styles.progressBarFill,
-                  { width: `${completionPercentage}%` }
+                  { width: `${completionPercentage}%` },
                 ]}
               />
             </View>
@@ -386,23 +457,29 @@ function TrackingScreen() {
 
         {/* Quick Actions */}
         <View style={styles.quickActions}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.quickActionButton}
-                          onPress={(e) => {
-                e.stopPropagation();
-                // Navigate to smart add component
-                router.push(`/(tabs)/tracking/add-smart-meals?mealPlanId=${mealPlan.id}&mealPlanName=${encodeURIComponent(mealPlan.name)}` as any);
-              }}
+            onPress={(e) => {
+              e.stopPropagation();
+              // Navigate to smart add component
+              router.push(
+                `/(tabs)/tracking/add-smart-meals?mealPlanId=${
+                  mealPlan.id
+                }&mealPlanName=${encodeURIComponent(mealPlan.name)}` as any
+              );
+            }}
           >
             <Ionicons name="sparkles" size={14} color="#007AFF" />
             <Text style={styles.quickActionText}>Smart Add</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.quickActionButton}
             onPress={(e) => {
               e.stopPropagation();
-              router.push(`/(tabs)/tracking/meal-plan-detail?id=${mealPlan.id}`);
+              router.push(
+                `/(tabs)/tracking/meal-plan-detail?id=${mealPlan.id}`
+              );
             }}
           >
             <Ionicons name="eye" size={14} color="#007AFF" />
@@ -430,7 +507,10 @@ function TrackingScreen() {
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={() => getMealPlan()}>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => getMealPlan()}
+          >
             <Text style={styles.retryButtonText}>Thử lại</Text>
           </TouchableOpacity>
         </View>
@@ -451,8 +531,23 @@ function TrackingScreen() {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>🎯 Theo dõi bữa ăn</Text>
           <TouchableOpacity
+            style={styles.chatButton}
+            onPress={() => router.push("/chat")}
+          >
+            <Image
+              source={require("@/assets/images/ai_re.png")}
+              style={{
+                width: '90%',
+                height: "90%",
+                borderRadius: 99
+              }}
+              alt="ask AI"
+              resizeMode="cover"
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
             style={styles.createButton}
-            onPress={() => router.push('/(tabs)/tracking/create-meal-plan')}
+            onPress={() => router.push("/(tabs)/tracking/create-meal-plan")}
           >
             <Ionicons name="add" size={24} color="white" />
           </TouchableOpacity>
@@ -464,19 +559,22 @@ function TrackingScreen() {
         {/* Meal Plans Section */}
         <View style={styles.mealPlansSection}>
           <Text style={styles.sectionTitle}>📋 Kế hoạch của bạn</Text>
-          
+
           {mealPlans.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Ionicons name="calendar-outline" size={64} color="#94a3b8" />
               <Text style={styles.emptyTitle}>Chưa có kế hoạch bữa ăn</Text>
               <Text style={styles.emptyDescription}>
-                Tạo kế hoạch bữa ăn đầu tiên để bắt đầu hành trình ăn uống lành mạnh
+                Tạo kế hoạch bữa ăn đầu tiên để bắt đầu hành trình ăn uống lành
+                mạnh
               </Text>
               <TouchableOpacity
                 style={styles.createFirstPlanButton}
-                onPress={() => router.push('/(tabs)/tracking/create-meal-plan')}
+                onPress={() => router.push("/(tabs)/tracking/create-meal-plan")}
               >
-                <Text style={styles.createFirstPlanText}>🎯 Tạo kế hoạch thông minh</Text>
+                <Text style={styles.createFirstPlanText}>
+                  🎯 Tạo kế hoạch thông minh
+                </Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -491,96 +589,106 @@ function TrackingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: "#f8fafc",
   },
   scrollView: {
     flex: 1,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     gap: 16,
   },
   loadingText: {
     fontSize: 16,
-    color: '#64748b',
+    color: "#64748b",
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     gap: 16,
     padding: 24,
   },
   errorText: {
     fontSize: 16,
-    color: '#ef4444',
-    textAlign: 'center',
+    color: "#ef4444",
+    textAlign: "center",
   },
   retryButton: {
-    backgroundColor: '#ef4444',
+    backgroundColor: "#ef4444",
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
   },
   retryButtonText: {
-    color: 'white',
-    fontWeight: '600',
+    color: "white",
+    fontWeight: "600",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 20,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
+    borderBottomColor: "#e2e8f0",
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1e293b',
+    fontWeight: "bold",
+    color: "#1e293b",
   },
   createButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: Colors.primary,
     width: 44,
     height: 44,
     borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  chatButton: {
+    backgroundColor: "white",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: Colors.primary,
   },
   todaySection: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     margin: 16,
     marginBottom: 8,
     borderRadius: 12,
     padding: 16,
-    shadowColor: '#64748b',
+    shadowColor: "#64748b",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 2,
   },
   todaySectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 16,
   },
   todaySectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1e293b',
+    fontWeight: "bold",
+    color: "#1e293b",
   },
   emptyTodayContainer: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     margin: 16,
     marginBottom: 8,
     borderRadius: 12,
     padding: 32,
-    alignItems: 'center',
-    shadowColor: '#64748b',
+    alignItems: "center",
+    shadowColor: "#64748b",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
@@ -588,34 +696,34 @@ const styles = StyleSheet.create({
   },
   emptyTodayText: {
     fontSize: 16,
-    color: '#64748b',
+    color: "#64748b",
     marginTop: 12,
     marginBottom: 16,
   },
   addMealButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: Colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
   },
   addMealButtonText: {
-    color: 'white',
-    fontWeight: '600',
+    color: "white",
+    fontWeight: "600",
   },
   todayMealCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: "#f1f5f9",
   },
   todayMealCardCompleted: {
     opacity: 0.7,
   },
   todayMealLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   mealCheckbox: {
@@ -626,25 +734,36 @@ const styles = StyleSheet.create({
   },
   todayMealType: {
     fontSize: 12,
-    color: '#64748b',
-    marginBottom: 2,
+    color: "#64748b",
+    marginBottom: 4,
   },
   todayMealName: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1e293b',
-    marginBottom: 2,
+    fontWeight: "600",
+    color: "#1e293b",
+    marginBottom: 4,
   },
   todayMealNameCompleted: {
-    textDecorationLine: 'line-through',
-    color: '#64748b',
+    textDecorationLine: "line-through",
+    color: "#64748b",
   },
   todayMealTime: {
     fontSize: 12,
-    color: '#64748b',
+    color: "#64748b",
   },
   recommendButton: {
     padding: 8,
+  },
+  mealActionButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  completionButton: {
+    padding: 4,
+  },
+  detailButton: {
+    padding: 4,
   },
   mealPlansSection: {
     padding: 16,
@@ -652,16 +771,16 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1e293b',
+    fontWeight: "bold",
+    color: "#1e293b",
     marginBottom: 16,
   },
   emptyContainer: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 12,
     padding: 32,
-    alignItems: 'center',
-    shadowColor: '#64748b',
+    alignItems: "center",
+    shadowColor: "#64748b",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
@@ -669,147 +788,147 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1e293b',
+    fontWeight: "bold",
+    color: "#1e293b",
     marginTop: 16,
     marginBottom: 8,
   },
   emptyDescription: {
     fontSize: 14,
-    color: '#64748b',
-    textAlign: 'center',
+    color: "#64748b",
+    textAlign: "center",
     lineHeight: 20,
     marginBottom: 24,
   },
   createFirstPlanButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: Colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
   },
   createFirstPlanText: {
-    color: 'white',
-    fontWeight: '600',
+    color: "white",
+    fontWeight: "600",
     fontSize: 16,
   },
   mealPlanCard: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#64748b',
+    shadowColor: "#64748b",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 2,
     borderLeftWidth: 4,
-    borderLeftColor: '#e2e8f0',
+    borderLeftColor: "#e2e8f0",
   },
   activeMealPlanCard: {
-    borderLeftColor: '#22c55e',
-    backgroundColor: '#f0fdf4',
+    borderLeftColor: "#22c55e",
+    backgroundColor: "#f0fdf4",
   },
   mealPlanHeader: {
     marginBottom: 12,
   },
   mealPlanTitleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 4,
   },
   mealPlanTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1e293b',
+    fontWeight: "bold",
+    color: "#1e293b",
     flex: 1,
   },
   activeLabel: {
-    backgroundColor: '#22c55e',
+    backgroundColor: "#22c55e",
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 12,
   },
   activeLabelText: {
-    color: 'white',
+    color: "white",
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   mealPlanDate: {
     fontSize: 14,
-    color: '#64748b',
+    color: "#64748b",
     marginBottom: 8,
   },
   mealPlanStats: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 16,
   },
   statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
   },
   statText: {
     fontSize: 12,
-    color: '#64748b',
+    color: "#64748b",
   },
   progressSection: {
     marginBottom: 12,
   },
   progressHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   progressLabel: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#1e293b',
+    fontWeight: "600",
+    color: "#1e293b",
   },
   progressPercentage: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#007AFF',
+    fontWeight: "600",
+    color: Colors.primary,
   },
   progressBarContainer: {
     height: 6,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: "#f1f5f9",
     borderRadius: 3,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   progressBarBackground: {
     flex: 1,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: "#f1f5f9",
   },
   progressBarFill: {
-    height: '100%',
-    backgroundColor: '#007AFF',
+    height: "100%",
+    backgroundColor: Colors.primary,
     borderRadius: 3,
   },
   mealPlanNotes: {
     fontSize: 14,
-    color: '#64748b',
-    fontStyle: 'italic',
+    color: "#64748b",
+    fontStyle: "italic",
     marginBottom: 12,
   },
   quickActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   quickActionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: "#f1f5f9",
     borderRadius: 16,
   },
   quickActionText: {
     fontSize: 12,
-    color: '#007AFF',
-    fontWeight: '500',
+    color: Colors.primary,
+    fontWeight: "500",
   },
 });
 

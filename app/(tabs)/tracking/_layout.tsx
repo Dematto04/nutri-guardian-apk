@@ -11,6 +11,7 @@ function TrackingLayout() {
         options={{
           headerTitleAlign: "center",
           headerShadowVisible: false,
+          headerShown: false,
           headerTitle: () => {
             return (
               <ThemedText type="subtitle">
