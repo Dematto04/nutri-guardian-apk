@@ -1,6 +1,6 @@
 import { UserAllergyService } from "@/service/userAllergy.service";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -51,6 +51,7 @@ interface AllergyProfileData {
 }
 
 export default function AllergenProfileScreen() {
+  const router = useRouter();
   const [profileData, setProfileData] = useState<AllergyProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -68,8 +69,8 @@ export default function AllergenProfileScreen() {
       } else {
         Alert.alert("Lỗi", "Không thể tải thông tin hồ sơ dị ứng");
       }
-    } catch (error) {
-      console.error("Error fetching allergy profile:", error);
+    } catch (error:any) {
+      console.error("Error fetching allergy profile:", error.messages);
       Alert.alert("Lỗi", "Đã xảy ra lỗi khi tải hồ sơ dị ứng");
     } finally {
       setLoading(false);
@@ -124,8 +125,30 @@ export default function AllergenProfileScreen() {
 
   const formatDate = (dateString: string) => {
     if (!dateString || dateString === "0001-01-01T00:00:00") return "Chưa có thông tin";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN');
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "Chưa có thông tin";
+      
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}-${month}-${year}`;
+    } catch {
+      return "Chưa có thông tin";
+    }
+  };
+
+  // Function to handle editing an allergy
+  const handleEditAllergy = (allergy: UserAllergy) => {
+    console.log("Navigating to update allergen profile with:", {
+      currentAllergenId: allergy.allergen.id,
+      allergenName: allergy.allergen.name
+    });
+    
+    router.push({
+      pathname: "/account/update-allergen-profile",
+      params: { currentAllergenId: allergy.allergen.id.toString() }
+    });
   };
 
   if (loading) {
@@ -204,6 +227,13 @@ export default function AllergenProfileScreen() {
                   </View>
                   
                   <View style={styles.allergyStatus}>
+                    <TouchableOpacity
+                      style={styles.editButton}
+                      onPress={() => handleEditAllergy(allergy)}
+                    >
+                      <Ionicons name="create-outline" size={20} color="#007AFF" />
+                    </TouchableOpacity>
+                    
                     <View
                       style={[
                         styles.severityBadge,
@@ -451,6 +481,12 @@ const styles = StyleSheet.create({
   allergyStatus: {
     alignItems: "flex-end",
     gap: 4,
+  },
+  editButton: {
+    padding: 4,
+    borderRadius: 6,
+    backgroundColor: "#f0f9ff",
+    marginBottom: 8,
   },
   severityBadge: {
     paddingHorizontal: 8,

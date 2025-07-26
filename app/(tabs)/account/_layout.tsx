@@ -39,6 +39,12 @@ function AccountStack() {
           headerTitleAlign: "center" 
         }} 
       />
+      <Stack.Screen 
+        name="update-allergen-profile" 
+        options={{
+          headerShown: false
+        }}
+      />
     </Stack>
   );
 }

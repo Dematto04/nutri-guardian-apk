@@ -22,9 +22,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.dematto.nutriguardianmobile",
-      "allowBackup": false,
-      "softwareKeyboardLayoutMode": "pan"
+      "package": "com.dematto.nutriguardianmobile"
     },
     "web": {
       "bundler": "metro",
