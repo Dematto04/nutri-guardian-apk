@@ -136,44 +136,20 @@ function ExploreScreen() {
   const fetchRecommendations = async () => {
     try {
       setRecommendationsLoading(true);
-      
-      // Default preferences for general recommendations
-      const preferences = {
-        cuisineTypes: ['Italian', 'Asian', 'Vietnamese'],
-        maxCookingTime: 60,
-        budgetRange: 'medium' as const,
-        preferredMealTypes: ['breakfast', 'lunch', 'dinner'],
-        includeLeftovers: true,
-        varietyMode: true,
-      };
 
-      const response = await MealPlanService.getRecipeRecommendations('dinner', preferences);
+      const response = await MealPlanService.getRecipeRecommendations();
       
       if (response.data?.isSucceeded) {
-        const recipeIds = response.data.data.slice(0, 8); // Get top 8 recommendations
-        setRecommendations(recipeIds);
+        const recipes = response.data.data.slice(0, 8); // Get top 8 recommendations
         
-        // Fetch recipe details for recommendations
-        const recipeDetails = await Promise.all(
-          recipeIds.map(async (id: number) => {
-            try {
-              const recipeResponse = await RecipeService.getRecipeById(id.toString());
-              return recipeResponse.data?.data;
-            } catch (error) {
-              console.error(`Error fetching recipe ${id}:`, error);
-              return null;
-            }
-          })
-        );
-        console.log({
-          recipe: recipeDetails.filter(recipe => recipe !== null)
-        });
-        
-        
-        setRecommendedRecipes(recipeDetails.filter(recipe => recipe !== null));
+        // The API already returns full recipe objects, no need to fetch again
+        setRecommendedRecipes(recipes);
+        setRecommendations(recipes.map((recipe: any) => recipe.id));
       }
     } catch (error) {
       console.error('Error fetching recommendations:', error);
+      setRecommendedRecipes([]);
+      setRecommendations([]);
     } finally {
       setRecommendationsLoading(false);
     }
@@ -183,37 +159,34 @@ function ExploreScreen() {
     try {
       setRecommendationsLoading(true);
       
-      const preferences = {
-        cuisineTypes: ['Italian', 'Asian', 'Vietnamese'],
-        maxCookingTime: mealType === 'breakfast' ? 30 : 60,
-        budgetRange: 'medium' as const,
-        preferredMealTypes: [mealType],
-        includeLeftovers: true,
-        varietyMode: true,
-      };
-
-      const response = await MealPlanService.getRecipeRecommendations(mealType, preferences);
+      const response = await MealPlanService.getRecipeRecommendations();
       
       if (response.data?.isSucceeded) {
-        const recipeIds = response.data.data.slice(0, 6);
-        setRecommendations(recipeIds);
+        // Filter recipes by meal type and get up to 6
+        const allRecipes = response.data.data;
+        const filteredRecipes = allRecipes.filter((recipe: any) => {
+          const recipeMealType = recipe.mealType?.toLowerCase();
+          const targetMealType = mealType.toLowerCase();
+          
+          // Map meal types
+          if (targetMealType === 'breakfast' && (recipeMealType?.includes('sáng') || recipeMealType === 'breakfast')) {
+            return true;
+          } else if (targetMealType === 'lunch' && (recipeMealType?.includes('trưa') || recipeMealType === 'lunch')) {
+            return true;
+          } else if (targetMealType === 'dinner' && (recipeMealType?.includes('tối') || recipeMealType === 'dinner')) {
+            return true;
+          }
+          
+          return false;
+        }).slice(0, 6);
         
-        // Fetch recipe details
-        const recipeDetails = await Promise.all(
-          recipeIds.map(async (id: number) => {
-            try {
-              const recipeResponse = await RecipeService.getRecipeById(id.toString());
-              return recipeResponse.data?.data;
-            } catch (error) {
-              return null;
-            }
-          })
-        );
-        
-        setRecommendedRecipes(recipeDetails.filter(recipe => recipe !== null));
+        setRecommendedRecipes(filteredRecipes);
+        setRecommendations(filteredRecipes.map((recipe: any) => recipe.id));
       }
     } catch (error) {
       console.error('Error fetching meal type recommendations:', error);
+      setRecommendedRecipes([]);
+      setRecommendations([]);
     } finally {
       setRecommendationsLoading(false);
     }
@@ -264,23 +237,37 @@ function ExploreScreen() {
       onPress={() => router.push(`/(tabs)/explore/recipe-detail/${item.id}`)}
     >
       <Image
-        source={item.imageUrl ? { uri: item.imageUrl} : require("@/assets/images/ai_re.png")}
+        source={item.thumbnailImageUrl ? { uri: item.thumbnailImageUrl} : require("@/assets/images/ai_re.png")}
         style={styles.recommendationImage}
-        resizeMode="contain"
+        resizeMode="cover"
       />
       <View style={styles.recommendationOverlay}>
-        <Text style={styles.recommendationTitle} numberOfLines={2}>
-          {item.name}
+        <Text 
+          style={styles.recommendationTitle} 
+          numberOfLines={2}
+          ellipsizeMode="tail"
+        >
+          {item.name || 'Món ăn'}
         </Text>
         <View style={styles.recommendationMeta}>
           <View style={styles.metaItem}>
             <Ionicons name="time-outline" size={12} color="white" />
-            <Text style={styles.metaText}>{item.prepTimeMinutes + item.cookTimeMinutes} phút</Text>
+            <Text 
+              style={styles.metaText}
+              numberOfLines={1}
+            >
+              {(item.prepTimeMinutes || 0) + (item.cookTimeMinutes || 0)} phút
+            </Text>
           </View>
-          {item.difficulty && (
+          {item.difficultyLevel && (
             <View style={styles.metaItem}>
               <Ionicons name="bar-chart-outline" size={12} color="white" />
-              <Text style={styles.metaText}>{item.difficulty}</Text>
+              <Text 
+                style={styles.metaText}
+                numberOfLines={1}
+              >
+                {item.difficultyLevel}
+              </Text>
             </View>
           )}
         </View>
@@ -420,11 +407,14 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '500' as const,
+    fontWeight: '600' as const,
     color: '#1e293b',
+    includeFontPadding: false,
+    textAlignVertical: 'center' as const,
+    lineHeight: 24,
   },
   smartButton: {
-    backgroundColor: '',
+    backgroundColor: Colors.primary,
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -456,6 +446,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500' as const,
     color: '#64748b',
+    includeFontPadding: false,
+    textAlignVertical: 'center' as const,
+    lineHeight: 18,
   },
   filterChipTextSelected: {
     color: 'white',
@@ -477,6 +470,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold' as const,
     color: '#1e293b',
+    includeFontPadding: false,
+    textAlignVertical: 'center' as const,
+    lineHeight: 24,
   },
   recommendationsLoading: {
     flexDirection: 'row' as const,
@@ -488,6 +484,9 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 14,
     color: '#64748b',
+    includeFontPadding: false,
+    textAlignVertical: 'center' as const,
+    lineHeight: 18,
   },
   recommendationsList: {
     paddingHorizontal: 20,
@@ -516,6 +515,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600' as const,
     marginBottom: 4,
+    includeFontPadding: false,
+    textAlignVertical: 'center' as const,
+    lineHeight: 18,
+    flexShrink: 1,
   },
   recommendationMeta: {
     flexDirection: 'row' as const,
@@ -525,10 +528,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     gap: 4,
+    flexShrink: 1,
   },
   metaText: {
     color: 'white',
     fontSize: 11,
+    includeFontPadding: false,
+    textAlignVertical: 'center' as const,
+    lineHeight: 14,
+    flexShrink: 1,
   },
   noRecommendations: {
     alignItems: 'center' as const,
@@ -538,6 +546,9 @@ const styles = StyleSheet.create({
   noRecommendationsText: {
     fontSize: 14,
     color: '#94a3b8',
+    includeFontPadding: false,
+    textAlignVertical: 'center' as const,
+    lineHeight: 18,
   },
   categoriesSection: {
     backgroundColor: 'white',
@@ -576,6 +587,10 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
     textAlign: 'center' as const,
     color: '#1e293b',
+    includeFontPadding: false,
+    textAlignVertical: 'center' as const,
+    lineHeight: 20,
+    flexShrink: 1,
   },
   errorContainer: {
     flex: 1,

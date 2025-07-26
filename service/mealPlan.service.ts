@@ -114,8 +114,8 @@ class MealPlanServiceBase {
     /**
      * 🔍 Get AI-filtered recipe recommendations 
      */
-    getRecipeRecommendations(mealType: string, preferences: MealPlanPreferences) {
-        return api.post(`${this.pathUrl}/recommendations?mealType=${mealType}`, preferences);
+    getRecipeRecommendations() {
+        return api.get(`/recommendnew/recommendations?count=10`);
     }
 
     /**
