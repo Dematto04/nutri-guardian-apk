@@ -39,11 +39,13 @@ export default function TabLayout() {
     <View style={{ flex: 1 }}>
       <Tabs
         initialRouteName="explore"
+        
         screenOptions={{
           tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
           headerShown: false,
           tabBarButton: HapticTab,
           tabBarBackground: TabBarBackground,
+          
         }}
       >
         <Tabs.Screen

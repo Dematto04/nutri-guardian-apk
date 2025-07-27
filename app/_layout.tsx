@@ -37,6 +37,7 @@ export default function RootLayout() {
             <Stack.Screen name="quiz" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="payment" options={{ headerShown: false }} />
+            <Stack.Screen name="analyze" options={{ headerShown: true, headerTitle: "AI phân tích món ăn" }} />
             <Stack.Screen name="detail" options={{ headerShown: false }} />
             <Stack.Screen name="chat" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />

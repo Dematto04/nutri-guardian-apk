@@ -450,11 +450,11 @@ export default function SubscriptionScreen() {
                 </View>
 
                 {/* Action Button */}
-                {!isCurrentPlan && (
+                {!isCurrentPlan && plan.name !== 'Free' && (
                   <ThemedButton
                     title={subscriptionStatus?.hasActiveSubscription ? 
                       (canUpgrade ? "Nâng cấp" : "Không thể nâng cấp") : 
-                      "Đăng ký"}
+                      (plan.name === 'Free' ? "Luôn kích hoạt" : "Đăng ký")}
                     onPress={() => subscriptionStatus?.hasActiveSubscription ? 
                       handleUpgrade(plan) : 
                       handleSubscribe(plan)}
