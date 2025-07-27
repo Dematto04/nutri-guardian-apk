@@ -190,10 +190,7 @@ function TrackingScreen() {
         varietyMode: true,
       };
 
-      const response = await MealPlanService.getRecipeRecommendations(
-        mealType,
-        preferences
-      );
+      const response = await MealPlanService.getRecipeRecommendations();
 
       if (response.data?.isSucceeded) {
         const recipeIds = response.data.data;
@@ -283,6 +280,20 @@ function TrackingScreen() {
         <View style={styles.emptyTodayContainer}>
           <Ionicons name="restaurant-outline" size={48} color="#94a3b8" />
           <Text style={styles.emptyTodayText}>Chưa có bữa ăn nào hôm nay</Text>
+
+          {/* Quick Food Analysis */}
+          <TouchableOpacity
+            style={styles.quickAnalysisButton}
+            onPress={() => {
+              router.push("/analyze");
+            }}
+          >
+            <Ionicons name="camera" size={18} color="#10b981" />
+            <Text style={styles.quickAnalysisText}>📸 Phân tích món ăn</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.orText}>hoặc</Text>
+
           <TouchableOpacity
             style={styles.addMealButton}
             onPress={() => router.push("/(tabs)/tracking/create-meal-plan")}
@@ -301,6 +312,27 @@ function TrackingScreen() {
             <Ionicons name="sparkles" size={20} color={Colors.primary} />
           </TouchableOpacity>
         </View>
+
+        {/* Food Analysis Card */}
+        <TouchableOpacity
+          style={styles.foodAnalysisCard}
+          onPress={() => {
+            router.push("/analyze");
+          }}
+        >
+          <View style={styles.foodAnalysisContent}>
+            <View style={styles.foodAnalysisIcon}>
+              <Ionicons name="camera" size={24} color="#10b981" />
+            </View>
+            <View style={styles.foodAnalysisText}>
+              <Text style={styles.foodAnalysisTitle}>📸 Phân tích món ăn</Text>
+              <Text style={styles.foodAnalysisSubtitle}>
+                Chụp ảnh món ăn để nhận dinh dưỡng tự động
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#64748b" />
+          </View>
+        </TouchableOpacity>
 
         {todaysMeals.map((meal) => (
           <TouchableOpacity
@@ -530,27 +562,35 @@ function TrackingScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>🎯 Theo dõi bữa ăn</Text>
-          <TouchableOpacity
-            style={styles.chatButton}
-            onPress={() => router.push("/chat")}
-          >
-            <Image
-              source={require("@/assets/images/ai_re.png")}
-              style={{
-                width: '90%',
-                height: "90%",
-                borderRadius: 99
-              }}
-              alt="ask AI"
-              resizeMode="cover"
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.createButton}
-            onPress={() => router.push("/(tabs)/tracking/create-meal-plan")}
-          >
-            <Ionicons name="add" size={24} color="white" />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              style={styles.cameraButton}
+              onPress={() => router.push("/analyze")}
+            >
+              <Ionicons name="camera" size={20} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.chatButton}
+              onPress={() => router.push("/chat")}
+            >
+              <Image
+                source={require("@/assets/images/ai_re.png")}
+                style={{
+                  width: "90%",
+                  height: "90%",
+                  borderRadius: 99,
+                }}
+                alt="ask AI"
+                resizeMode="cover"
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.createButton}
+              onPress={() => router.push("/(tabs)/tracking/create-meal-plan")}
+            >
+              <Ionicons name="add" size={24} color="white" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Today's Meals Section */}
@@ -582,6 +622,9 @@ function TrackingScreen() {
           )}
         </View>
       </ScrollView>
+
+      {/* Floating Camera Button */}
+
     </SafeAreaView>
   );
 }
@@ -639,6 +682,25 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#1e293b",
+    flex: 1,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  cameraButton: {
+    backgroundColor: "#10b981",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#10b981",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   createButton: {
     backgroundColor: Colors.primary,
@@ -681,6 +743,41 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#1e293b",
   },
+  foodAnalysisCard: {
+    backgroundColor: "#f0fdf4",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#bbf7d0",
+  },
+  foodAnalysisContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  foodAnalysisIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#dcfce7",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  foodAnalysisText: {
+    flex: 1,
+  },
+  foodAnalysisTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1e293b",
+    marginBottom: 4,
+  },
+  foodAnalysisSubtitle: {
+    fontSize: 14,
+    color: "#64748b",
+    lineHeight: 20,
+  },
   emptyTodayContainer: {
     backgroundColor: "white",
     margin: 16,
@@ -699,6 +796,29 @@ const styles = StyleSheet.create({
     color: "#64748b",
     marginTop: 12,
     marginBottom: 16,
+  },
+  quickAnalysisButton: {
+    backgroundColor: "#f0fdf4",
+    borderWidth: 1,
+    borderColor: "#bbf7d0",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  quickAnalysisText: {
+    color: "#15803d",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  orText: {
+    fontSize: 14,
+    color: "#94a3b8",
+    marginBottom: 12,
+    fontStyle: "italic",
   },
   addMealButton: {
     backgroundColor: Colors.primary,
@@ -929,6 +1049,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.primary,
     fontWeight: "500",
+  },
+  floatingCameraButton: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    backgroundColor: "#10b981",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderRadius: 25,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    shadowColor: "#10b981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  floatingCameraText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });
 
